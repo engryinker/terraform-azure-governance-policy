@@ -1,0 +1,52 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: terraform fmt
+        run: terraform fmt -check -recursive
+
+      - name: terraform init (root module)
+        run: terraform init -backend=false
+
+      - name: terraform validate (root module)
+        run: terraform validate
+
+      - name: terraform init & validate (examples)
+        run: |
+          for dir in examples/*/; do
+            echo "== $dir =="
+            terraform -chdir="$dir" init -backend=false
+            terraform -chdir="$dir" validate
+          done
+
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+
+      - name: tflint (root module)
+        run: |
+          tflint --init
+          tflint
+
+      - name: tflint (examples)
+        run: |
+          for dir in examples/*/; do
+            tflint --chdir="$dir" --init
+            tflint --chdir="$dir"
+          done
