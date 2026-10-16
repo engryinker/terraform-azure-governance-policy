@@ -10,7 +10,7 @@ Scope: **management group** definitions and assignments only (the org's landing 
 
 ```hcl
 module "governance-policy" {
-  source = "git::https://github.com/<org>/terraform-azure-governance-policy.git?ref=v1.0.0"
+  source = "git::https://github.com/engryinker/terraform-azure-governance-policy.git?ref=v1.0.0"
 
   policy_definitions = {
     deny_pdns = {
